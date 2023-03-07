@@ -3,10 +3,11 @@ name: CI
 
 
 on: 
+// elle permet de définir le comportement déclencheur de notre piepline CI//
   push:
-    branches : [main]
+    branches : [ main]
   pull_request:
-    branches: [main]
+    branches: [ main]
   
 jobs:
  
