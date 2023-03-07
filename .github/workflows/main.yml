@@ -10,4 +10,14 @@ on:
     branches: [ main]
   
 jobs:
- 
+  build:
+    runs-on: environement
+
+    steps:
+    - uses: a définir 
+    - name:  à définir
+      uses: à définir 
+      with:
+        node-version: ?
+    - run: npm install
+    - run: npm test
