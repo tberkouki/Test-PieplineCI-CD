@@ -10,6 +10,7 @@ on:
     branches: [ main]
   
 jobs:
+// permet de définir les tâches qui doivent être effectuées pour construire, tester, deployer ou effectuer toute autre opération nécessaire dans le cadre de notre piepline//
   build:
     runs-on: environement
 
