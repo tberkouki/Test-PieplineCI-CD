@@ -66,20 +66,21 @@ jobs:
       run: |
         ./gradlew bootJar
 
-    - name: Deploy Spring Boot app to AWS Elastic Beanstalk
+    - name: Deploy Spring Boot app to AWS CodeDeploy
       # Configure the AWS CLI with the necessary credentials and region
       run: |
         aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
         aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
         aws configure set default.region ${{ env.AWS_REGION }}
-      # Deploy the packaged Spring Boot app to AWS Elastic Beanstalk
+      # Deploy the packaged Spring Boot app to AWS CodeDeploy
       run: |
-        # Create a new application version in Elastic Beanstalk
-        result=$(aws elasticbeanstalk create-application-version \
-          --application-name {{ env.EB_APPLICATION_NAME }} \
-          --version-label {{ env.EB_APPLIC}})
+        # Create a new deployment in CodeDeploy
+        result=$(aws deploy create-deployment \
+          --application-name {{ env.CD_APPLICATION_NAME }} \
+          --deployment-group-name {{ env.CD_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket={{ env.CD_BUCKET_NAME }},key={{ env.CD_KEY }},bundleType={{ env.CD_BUNDLE_TYPE }})
         if [ $? -ne 0 ]; then
-          echo "Error: Failed to create application version: $result"
+          echo "Error: Failed to create deployment: $result"
           exit 1
         fi
-        echo "Successfully created application version: $result"
+        echo "Successfully created deployment: $result"
