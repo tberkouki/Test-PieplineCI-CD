@@ -40,6 +40,8 @@ jobs:
       # Run tests on the React app
       run: |
         yarn test
+        yarn add --dev jest supertest
+        yarn test:integration
 
     - name: Build React app
       # Build the React app using yarn
