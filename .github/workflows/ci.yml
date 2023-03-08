@@ -68,12 +68,3 @@ jobs:
         application-name: my-react-app
         deployment-group: my-react-app-group
         artifact: build
-    
-    - name: Notify Email
-      # Notify an email address about the deployment
-      uses: actions/email/action@v1
-      if: always()
-      with:
-        to: example@example.com
-        subject: Deployment of my-react-app to AWS CodeDeploy has completed
-        body: The deployment of my-react-app to AWS CodeDeploy has completed successfully
