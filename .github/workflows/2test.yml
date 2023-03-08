@@ -1,0 +1,44 @@
+#name détermine le nom, qui s'affichera dans les badges d'état du flux de travail
+name: CI
+
+#signifie les évènements qui déclenchent le flux de travail
+#déclenché  lorsqu’un push ou pull_request se produit sur la main branche où tous les fichiers ont changé se terminant par les extensions de fichier .cs ou .csproj.
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+    paths:
+    - '**.cs'
+    - '**.csproj'
+
+#définit des variables d’environnement nommées (env var)
+#La variable DOTNET_VERSION d’environnement est affectée à la valeur '6.0.401'. La variable d’environnement est ultérieurement référencée pour spécifier l’action dotnet-versionactions/setup-dotnet@v3 GitHub.
+env:
+  DOTNET_VERSION: '6.0.401' # The .NET SDK version to use
+
+#génère les étapes pour que le flux de travail prenne. Il existe un seul travail, nommé build-<os> où le <os> nom du système d’exploitation est le strategy/matrix
+#Les éléments et runs-on les name éléments sont dynamiques pour chaque valeur dans le matrix/os. Cela s’exécute sur les dernières versions d’Ubuntu, Windows et macOS.
+#L’action actions/setup-dotnet@v3 GitHub est nécessaire pour configurer le Kit de développement logiciel (SDK) .NET avec la version spécifiée à partir de la DOTNET_VERSION variable d’environnement.
+#On peut ajouter d'autres étapes facultatives 
+
+jobs:
+  build:
+
+    name: build-${{matrix.os}}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
