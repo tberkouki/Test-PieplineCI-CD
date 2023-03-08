@@ -76,7 +76,6 @@ jobs:
         aws configure set default.region ${{ env.AWS_REGION }}
       # Deploy the packaged Spring Boot app to AWS CodeDeploy
       run: |
-        # Create a new deployment in CodeDeploy
         result=$(aws deploy create-deployment \
           --application-name {{ env.CD_APPLICATION_NAME }} \
           --deployment-group-name {{ env.CD_DEPLOYMENT_GROUP_NAME }} \
