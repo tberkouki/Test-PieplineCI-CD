@@ -1,11 +1,12 @@
 # Define the name of the workflow
-name: Deploy to AWS CodeDeploy
+name: Deploy to AWS
 
 # Specify the trigger for the workflow
 on:
   push:
     branches:
       - main
+      - develop
 
 # Define environment variables for the AWS CLI
 env:
@@ -26,7 +27,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Setup environment
-      # Install the dependencies required for building the React app
+      # Install the dependencies required for building the React app and deploying to AWS
       run: |
         sudo apt-get update
         sudo apt-get install -y awscli
@@ -46,19 +47,39 @@ jobs:
         yarn build
 
     - name: Package React app
-      # Package the built React app and upload it as an artifact
+      # Package the built React app and upload it as an artifact to AWS S3
       uses: actions/upload-artifact@v2
       with:
         name: build
         path: build
 
-    - name: Deploy to AWS CodeDeploy
-      # Deploy the packaged React app to AWS CodeDeploy using the AWS CLI
+    - name: Deploy React app to AWS S3
+      # Deploy the packaged React app to AWS S3 using the AWS CLI
       run: |
         aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
         aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
         aws configure set default.region ${{ env.AWS_REGION }}
-        aws deploy create-deployment \
-          --application-name my-react-app \
-          --deployment-group-name my-react-app-group \
-          --artifact-location type=S3,location={{ env.ARTIFACT_BUCKET }}/build
+        aws s3 sync build s3://{{ env.S3_BUCKET }}/build
+
+    - name: Package Spring Boot app
+      # Package the Spring Boot app using the Gradle wrapper
+      run: |
+        ./gradlew bootJar
+
+    - name: Deploy Spring Boot app to AWS Elastic Beanstalk
+      # Configure the AWS CLI with the necessary credentials and region
+      run: |
+        aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws configure set default.region ${{ env.AWS_REGION }}
+      # Deploy the packaged Spring Boot app to AWS Elastic Beanstalk
+      run: |
+        # Create a new application version in Elastic Beanstalk
+        result=$(aws elasticbeanstalk create-application-version \
+          --application-name {{ env.EB_APPLICATION_NAME }} \
+          --version-label {{ env.EB_APPLIC}})
+        if [ $? -ne 0 ]; then
+          echo "Error: Failed to create application version: $result"
+          exit 1
+        fi
+        echo "Successfully created application version: $result"
