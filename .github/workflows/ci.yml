@@ -34,6 +34,11 @@ jobs:
         sudo apt-get install -y nodejs
         sudo apt-get install -y build-essential
         yarn install
+    
+    - name: Test React app
+      # Run tests on the React app
+      run: |
+        yarn test
 
     - name: Build React app
       # Build the React app using yarn
