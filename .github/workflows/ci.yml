@@ -51,6 +51,12 @@ jobs:
       with:
         name: build
         path: build
+    
+    - name: Install Python dependencies for AWS CLI
+      # Install the dependencies required for the AWS CLI
+      run: |
+        sudo apt-get install -y python3-pip
+        pip3 install awscli
 
     - name: Deploy to AWS CodeDeploy
       # Deploy the packaged React app to AWS CodeDeploy
