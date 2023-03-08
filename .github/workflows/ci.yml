@@ -34,7 +34,7 @@ jobs:
         sudo apt-get install -y nodejs
         sudo apt-get install -y build-essential
         yarn install
-    
+
     - name: Test React app
       # Run tests on the React app
       run: |
@@ -51,20 +51,14 @@ jobs:
       with:
         name: build
         path: build
-    
-    - name: Install Python dependencies for AWS CLI
-      # Install the dependencies required for the AWS CLI
-      run: |
-        sudo apt-get install -y python3-pip
-        pip3 install awscli
 
     - name: Deploy to AWS CodeDeploy
-      # Deploy the packaged React app to AWS CodeDeploy
-      uses: aws-actions/aws-codedeploy-deployment-action@v1
-      with:
-        access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-        secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-        region: ${{ env.AWS_REGION }}
-        application-name: my-react-app
-        deployment-group: my-react-app-group
-        artifact: build
+      # Deploy the packaged React app to AWS CodeDeploy using the AWS CLI
+      run: |
+        aws configure set aws_access_key_id ${{ env.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws configure set default.region ${{ env.AWS_REGION }}
+        aws deploy create-deployment \
+          --application-name my-react-app \
+          --deployment-group-name my-react-app-group \
+          --artifact-location type=S3,location={{ env.ARTIFACT_BUCKET }}/build
