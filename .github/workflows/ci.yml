@@ -1,0 +1,59 @@
+# Define the name of the workflow
+name: Deploy to AWS CodeDeploy
+
+# Specify the trigger for the workflow
+on:
+  push:
+    branches:
+      - main
+
+# Define environment variables for the AWS CLI
+env:
+  AWS_REGION: us-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+# Define the job for the workflow
+jobs:
+  deploy:
+    # Specify the operating system for the runner
+    runs-on: ubuntu-latest
+
+    # Define the steps for the job
+    steps:
+    - name: Checkout code
+      # Use the checkout action to check out the code from the repository
+      uses: actions/checkout@v2
+
+    - name: Setup environment
+      # Install the dependencies required for building the React app
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
+        curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+        sudo apt-get install -y build-essential
+        yarn install
+
+    - name: Build React app
+      # Build the React app using yarn
+      run: |
+        yarn build
+
+    - name: Package React app
+      # Package the built React app and upload it as an artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: build
+
+    - name: Deploy to AWS CodeDeploy
+      # Deploy the packaged React app to AWS CodeDeploy
+      uses: aws-actions/aws-codedeploy-deployment-action@v1
+      with:
+        access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        region: ${{ env.AWS_REGION }}
+        application-name: my-react-app
+        deployment-group: my-react-app-group
+        artifact: build
